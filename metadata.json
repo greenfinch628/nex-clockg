@@ -1,0 +1,10 @@
+{
+  "uuid": "nex-clockg@greenfinch628.github.io",
+  "name": "nex-clockg",
+  "description": "A crisp, configurable analog clock with smooth or ticking seconds.",
+  "shell-version": ["50"],
+  "version": 1,
+  "version-name": "1.0.0",
+  "settings-schema": "org.gnome.shell.extensions.nex-clockg",
+  "url": "https://github.com/greenfinch628/gnome-shell-nex-clockg"
+}

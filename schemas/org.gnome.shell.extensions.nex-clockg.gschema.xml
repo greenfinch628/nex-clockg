@@ -1,0 +1,12 @@
+<schemalist>
+  <schema id="org.gnome.shell.extensions.nex-clockg" path="/org/gnome/shell/extensions/nex-clockg/">
+    <key name="diameter" type="i"><default>200</default><range min="120" max="400"/><summary>Clock diameter in logical pixels</summary></key>
+    <key name="theme" type="s"><default>'white'</default><choices><choice value="white"/><choice value="black"/></choices><summary>Clock face theme</summary></key>
+    <key name="movement" type="s"><default>'smooth'</default><choices><choice value="smooth"/><choice value="tick"/></choices><summary>Seconds hand movement</summary></key>
+    <key name="refresh-rate" type="i"><default>30</default><range min="15" max="30"/><summary>Smooth animation frames per second</summary></key>
+    <key name="numerals" type="s"><default>'all'</default><choices><choice value="all"/><choice value="quarters"/></choices><summary>Numeral layout</summary></key>
+    <key name="minute-markers" type="b"><default>true</default><summary>Show minute markers</summary></key>
+    <key name="horizontal-offset" type="i"><default>24</default><range min="0" max="4000"/><summary>Distance from the right of the primary work area</summary></key>
+    <key name="vertical-offset" type="i"><default>24</default><range min="0" max="4000"/><summary>Distance from the top of the primary work area</summary></key>
+  </schema>
+</schemalist>
