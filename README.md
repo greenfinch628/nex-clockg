@@ -1,7 +1,8 @@
 # nex-clockg
 
 A standalone GNOME Shell desktop analog clock. The face contains no branding.
-It draws above the wallpaper and below application windows on the primary monitor.
+By default it draws above the wallpaper and below application windows on the primary monitor.
+Enable Always on Top to keep it visible above normal application windows.
 Simple Clock and other installed extensions are left untouched.
 
 ![White clock](docs/screenshots/white-200@1x.png)
@@ -10,16 +11,32 @@ Simple Clock and other installed extensions are left untouched.
 These two images are deterministic Cairo renderer previews, not desktop captures.
 See [verification notes](docs/VERIFICATION.md) for the runtime test scope.
 
+## Screenshots
+
+![White analog clock on the desktop wallpaper](docs/screenshots/desktop-clock.png)
+
+The clock on the desktop with a white face, all twelve numerals, minute markers,
+a dark gray bezel, black hour and minute hands, and a red seconds hand.
+
+![nex-clockg preferences showing appearance, desktop position and seconds-hand settings](docs/screenshots/preferences.png)
+
+The preferences dialog shows a 160-logical-pixel white clock with all twelve
+numerals and minute markers enabled. It is positioned in the bottom-right corner
+with 24 logical pixels of padding from the right and bottom edges. The seconds
+hand is configured for a smooth sweep at 30 frames per second.
+
+This preferences screenshot predates the Always on Top switch. The current
+version also includes that switch under Desktop position; it defaults to Off.
+
 ## Compatibility
 
-Fedora 44 / GNOME Shell 50.6 is the available test environment. GNOME 51 is a
-planned target, but has not been tested. Metadata deliberately lists only GNOME
-50 until a GNOME 51 runtime verification is completed. Do not bypass Shell's
-version check to treat an untested environment as supported.
+The extension allows GNOME Shell 50 and 51. Fedora 44 / GNOME Shell 50.6 is
+runtime-tested. Fedora 45 / GNOME Shell 51 is enabled in metadata at the user's
+request, but no GNOME 51 runtime is available here to verify behavior.
 
 ## Install
 
-Required runtime components: GNOME Shell 50, GJS, GTK4 and libadwaita.
+Required runtime components: GNOME Shell 50 or 51, GJS, GTK4 and libadwaita.
 Packaging requires Python 3 and `glib-compile-schemas` (Fedora `glib2`).
 No root access or system-wide configuration changes are needed.
 
@@ -65,13 +82,20 @@ gnome-extensions disable nex-clockg@greenfinch628.github.io
 | Seconds movement | Smooth | Smooth / tick |
 | Smooth refresh rate | 30 FPS | 15–30 FPS |
 | Minute markers | On | On / off |
-| Position | 24 px from top and right | Offsets 0–4000 logical px |
+| Always on Top | Off | Off / on |
+| Location | Top Right | Top Left / Top Right / Bottom Left / Bottom Right |
+| Padding | 24 px horizontally and vertically | 0–4000 logical px from selected corner |
 
 Changes apply immediately and are stored in the extension's own GSettings path,
-`/org/gnome/shell/extensions/nex-clockg/`. The position uses the primary monitor's
+`/org/gnome/shell/extensions/nex-clockg/`. The selected corner and padding use the primary monitor's
 work area and follows work-area and monitor changes. Offsets are clamped to the
 available area. The widget is not draggable and does not intercept desktop clicks.
-It hides in overview and on the lock screen. Application windows cover it.
+It hides in overview and on the lock screen. Application windows cover it when Always on Top is Off (the default for both new
+and existing installations). Switching this preference reparents the same actor
+immediately, preserving position, size, appearance and saved settings. On places
+it above normal windows but below Shell chrome and modal/top windows. Both modes
+hide during overview and lock; neither intercepts clicks. GNOME 51 is allowed but remains
+unverified at runtime.
 
 Logical pixels scale with the desktop. St.DrawingArea supplies the scale-aware
 Cairo context; the renderer does not apply a second monitor scale.
@@ -114,7 +138,7 @@ The integration test stops its Shell on exit and retains its temporary logs for 
 
 ## Release
 
-Version 1.0.0 is prepared locally. Proposed repository:
+Version 1.1.0 is prepared locally. Repository:
 `greenfinch628/gnome-shell-nex-clockg`. Nothing is published automatically.
 Review `docs/VERIFICATION.md`, complete the outstanding platform checks, and obtain
 explicit approval before GitHub publication or release creation.

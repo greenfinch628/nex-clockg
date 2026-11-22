@@ -2,6 +2,9 @@
 
 Date: November 21, 2026. Initial release: 1.0.0 (unpublished).
 
+The sections through “Remaining checks” record the historical 1.0.0 baseline.
+See the 1.1.0 section below for the current compatibility declaration and results.
+
 ## Environment
 
 - Fedora Linux 44, GNOME Shell / Mutter 50.6, GJS 1.88.1.
@@ -42,3 +45,60 @@ Date: November 21, 2026. Initial release: 1.0.0 (unpublished).
 
 Do not publish until the remaining release checks have been reviewed and explicit
 publication approval has been obtained.
+
+
+## 1.1.0 Always on Top verification — November 21, 2026
+
+Inspected the installed GNOME Shell 50.6 `layout.js` resource in
+`/usr/lib64/gnome-shell/libshell-18.so`: `uiGroup` contains `window_group`,
+and `Meta.BackgroundGroup` is the bottom child of `window_group`. Off nests the clock inside that background group, above its wallpaper actors
+and below application actors. On inserts into `uiGroup`
+immediately above `window_group`, below Shell chrome and top/modal windows.
+The clock remains nonreactive, and existing overview/session hiding is retained.
+No stacking polling, new timers, or new signal connections are added.
+
+The development repository was found at `/home/rczys/Applications/nex-clockg`,
+branch `main`, commit `87aff9f`, with existing uncommitted corner-placement work.
+That work was preserved. Contrary to the work order's initial assumption, both
+that commit and the installed extension already use desktop-level placement.
+On introduces the requested above-normal-windows mode; Off retains that placement.
+
+Focused automated checks on Fedora 44 / GNOME 50.6:
+
+- Strict schema compilation, JS syntax, clock math, renderer previews and ZIP build.
+- Fresh private settings default Off. Existing theme/size/movement settings and
+  the new On value survive separate processes and two private dconf sessions.
+- Real GTK application window in normal and maximized states: scene graph ordering
+  places Off above wallpaper and below the window, and On above the window group.
+- Twenty immediate Off/On changes preserve one actor, its identity, geometry and
+  active animation source. Workspace switching retains the mapped desktop widget.
+- Five disable/enable cycles retain On and clean actors, timers and signal handlers.
+- Smooth/tick animation, appearance changes, overview hiding and native preferences
+  construction remain covered by the integration suite. The new switch is checked
+  in both GSettings binding directions.
+
+GNOME 51 APIs have not been verified at runtime. Metadata allows GNOME 50 and 51
+at the user’s explicit request; GNOME 51 verification remains outstanding.
+Physical login/logout, lock/unlock, mixed-monitor behavior and long-running CPU
+profiling remain untested. No updated preferences screenshot was captured.
+The isolated session may report service/portal warnings unrelated to the extension;
+no extension GJS lifecycle/rendering errors were observed.
+
+
+### Window-restacking correction
+
+A user reported the desktop clock returning above windows after moving them.
+The initial direct-child placement in `window_group` was insufficient: Mutter
+can reorder those children during window restacking. Off now nests the clock
+inside `Meta.BackgroundGroup`, which remains below normal windows. Shell keeps
+replacement wallpaper actors at the bottom of that stable group. No recurring
+stacking timer or additional signal handler is needed.
+
+The regression test moves, raises and focuses a real window after toggling, and
+captures maximized-window screenshots for both modes. Visual inspection confirms
+Off is covered and On remains visible. Background replacement and an uncovered
+Off-mode desktop capture verify that the clock remains above the wallpaper.
+
+The user confirmed that the window-restacking correction fixed the reported
+behavior in their desktop session. Version 1.1.0 includes the pre-existing corner
+placement changes and the supplied README screenshots.

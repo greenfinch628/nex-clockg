@@ -5,6 +5,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {drawClock} from './lib/clockRenderer.js';
 import {nextDelay} from './lib/timing.js';
+import {clockPosition} from './lib/placement.js';
 
 export default class NexClock extends Extension {
     enable() {
@@ -23,12 +24,6 @@ export default class NexClock extends Extension {
                     cr.$dispose();
                 }
             });
-            // A desktop actor belongs above the background and below window actors.
-            // Find the public Meta type rather than relying on layoutManager internals.
-            const background = global.window_group.get_children().find(a => a instanceof Meta.BackgroundGroup);
-            global.window_group.insert_child_above(this._actor, background ?? null);
-            if (!background)
-                global.window_group.set_child_below_sibling(this._actor, null);
             this._connect(this._settings, 'changed', () => this._configure());
             this._connect(Main.layoutManager, 'monitors-changed', () => this._position());
             this._connect(global.display, 'workareas-changed', () => this._position());
@@ -56,9 +51,30 @@ export default class NexClock extends Extension {
         };
         const size = this._settings.get_int('diameter');
         this._actor.set_size(size, size);
+        this._stack();
         this._position();
         this._visibility();
         this._restart();
+    }
+
+    _stack() {
+        const onTop = this._settings.get_boolean('always-on-top');
+        // Mutter restacks direct window_group children when windows move/raise.
+        // Nest the desktop clock inside the stable background group instead.
+        // Shell inserts replacement wallpaper actors at the bottom of this group.
+        const background = global.window_group.get_children().find(a => a instanceof Meta.BackgroundGroup);
+        if (!onTop && !background)
+            throw new Error('nex-clockg: desktop background group is unavailable');
+        const parent = onTop ? Main.layoutManager.uiGroup : background;
+        if (this._actor.get_parent() === parent)
+            return;
+        this._actor.get_parent()?.remove_child(this._actor);
+        if (onTop) {
+            // Above normal windows, below Shell chrome and modal/top windows.
+            parent.insert_child_above(this._actor, global.window_group);
+        } else {
+            parent.add_child(this._actor);
+        }
     }
 
     _position() {
@@ -69,8 +85,8 @@ export default class NexClock extends Extension {
         const size = this._settings.get_int('diameter');
         const x = this._settings.get_int('horizontal-offset');
         const y = this._settings.get_int('vertical-offset');
-        this._actor.set_position(area.x + Math.max(0, area.width - size - x),
-            area.y + Math.min(y, Math.max(0, area.height - size)));
+        this._actor.set_position(...clockPosition(area, size,
+            this._settings.get_string('corner'), x, y));
     }
 
     _visibility() {

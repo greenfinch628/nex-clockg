@@ -5,7 +5,7 @@ export GSETTINGS_SCHEMA_DIR="$XDG_DATA_HOME/gnome-shell/extensions/$uuid/schemas
 helper="$XDG_DATA_HOME/gnome-shell/extensions/clock-test@local"
 mkdir -p "$helper"
 cat > "$helper/metadata.json" <<'JSON'
-{"uuid":"clock-test@local","name":"Isolated test helper","description":"Temporary test instrumentation","shell-version":["50"]}
+{"uuid":"clock-test@local","name":"Isolated test helper","description":"Temporary test instrumentation","shell-version":["50","51"]}
 JSON
 cat > "$helper/extension.js" <<'JS'
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';

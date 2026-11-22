@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.0 — 2026-11-21
+
+- Allow GNOME Shell 50 and 51 in metadata; GNOME 51 runtime testing is outstanding.
+- Fix desktop stacking after application windows move or raise by nesting the
+  Off-mode clock inside the background group.
+- Add a persistent Always on Top switch, Off by default for new and existing
+  installations. Switch layers immediately using the same clock actor.
+- Preserve overview/lock hiding, click-through behavior, position and animation.
+- Add a desktop corner selector while preserving existing horizontal and vertical
+  padding settings. Padding labels follow the selected corner.
+
+- Add desktop and preferences screenshots with descriptions in the README.
+- Verify window movement/restacking, live mode changes, preferences binding,
+  background replacement, settings persistence and actor/timer cleanup on GNOME
+  50.6. The user also confirmed the stacking fix in their desktop session.
+
 ## 1.0.0 — Unreleased
 
 - Add an unbranded Cairo desktop analog clock with white and black faces.
