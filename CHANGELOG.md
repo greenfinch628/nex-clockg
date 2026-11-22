@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 — 2026-11-21
+
+- Document disabling Show Second Hand to minimize performance impact by stopping
+  second-hand animation and using minute-aligned hour/minute updates.
+- Bump extension metadata to 1.3.0; clock behavior is unchanged from 1.2.0.
+
 ## 1.2.0 — 2026-11-21
 
 - Add a persistent Show Second Hand switch, enabled by default. Disable it to hide

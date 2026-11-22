@@ -102,6 +102,10 @@ unverified at runtime.
 Logical pixels scale with the desktop. St.DrawingArea supplies the scale-aware
 Cairo context; the renderer does not apply a second monitor scale.
 
+To minimize performance impact, disable **Show Second Hand** in preferences.
+This stops second-hand animation and reduces scheduled clock updates to once
+per minute while keeping the hour and minute hands current.
+
 With Show Second Hand enabled (the default), each frame reads the system clock
 directly, including fractional seconds in smooth mode. Tick mode recomputes the
 next real second boundary after every callback. Turning Show Second Hand off
@@ -147,7 +151,7 @@ The integration test stops its Shell on exit and retains its temporary logs for 
 
 ## Release
 
-Version 1.2.0 is prepared locally. Repository:
+Version 1.3.0 is prepared locally. Repository:
 `greenfinch628/nex-clockg`. Nothing is published automatically.
 Review `docs/VERIFICATION.md`, complete the outstanding platform checks, and obtain
 explicit approval before GitHub publication or release creation.
