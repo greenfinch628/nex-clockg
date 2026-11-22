@@ -139,7 +139,7 @@ The integration test stops its Shell on exit and retains its temporary logs for 
 ## Release
 
 Version 1.1.0 is prepared locally. Repository:
-`greenfinch628/gnome-shell-nex-clockg`. Nothing is published automatically.
+`greenfinch628/nex-clockg`. Nothing is published automatically.
 Review `docs/VERIFICATION.md`, complete the outstanding platform checks, and obtain
 explicit approval before GitHub publication or release creation.
 
