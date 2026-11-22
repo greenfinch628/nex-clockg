@@ -25,8 +25,9 @@ numerals and minute markers enabled. It is positioned in the bottom-right corner
 with 24 logical pixels of padding from the right and bottom edges. The seconds
 hand is configured for a smooth sweep at 30 frames per second.
 
-This preferences screenshot predates the Always on Top switch. The current
-version also includes that switch under Desktop position; it defaults to Off.
+This preferences screenshot predates the Always on Top and Show Second Hand
+switches. The current version includes Always on Top under Desktop position (default Off) and
+Show Second Hand under Seconds hand (default On).
 
 ## Compatibility
 
@@ -79,6 +80,7 @@ gnome-extensions disable nex-clockg@greenfinch628.github.io
 | Diameter | 200 logical px | 120–400 |
 | Face | White | White / black |
 | Numerals | All 12 | All 12 / 12, 3, 6, 9 |
+| Show Second Hand | On | On / off |
 | Seconds movement | Smooth | Smooth / tick |
 | Smooth refresh rate | 30 FPS | 15–30 FPS |
 | Minute markers | On | On / off |
@@ -100,12 +102,19 @@ unverified at runtime.
 Logical pixels scale with the desktop. St.DrawingArea supplies the scale-aware
 Cairo context; the renderer does not apply a second monitor scale.
 
-Each frame reads the system clock directly, including fractional seconds in
-smooth mode. Tick mode recomputes the next real second boundary after every
-callback. Neither mode accumulates an artificial clock time. Timers resume from
-current wall time after suspend or time adjustments. Animation stops when the
-actor is unmapped or explicitly hidden. A window covering the widget does not
-currently suspend its animation.
+With Show Second Hand enabled (the default), each frame reads the system clock
+directly, including fractional seconds in smooth mode. Tick mode recomputes the
+next real second boundary after every callback. Turning Show Second Hand off
+hides the red hand and stops its smooth/tick updates immediately. Only one
+minute-aligned timeout remains for the hour and minute hands, whose positions
+advance once per minute. No second-hand angles are calculated in this mode.
+Movement and Smooth refresh rate stay visible but are grayed out while the hand
+is off; their saved values are restored when it is turned back on.
+
+Every mode computes time from the current wall clock instead of accumulating
+an artificial time. Switching modes removes the previous timeout before creating
+its replacement. Animation stops when the actor is unmapped or explicitly hidden.
+A window covering the widget does not currently suspend its updates.
 
 60 FPS is intentionally omitted: 30 FPS is the tested initial target, and there
 is no comparative performance evidence yet to justify the additional redraws.
@@ -117,7 +126,7 @@ is no comparative performance evidence yet to justify the additional redraws.
 ./scripts/package.sh
 ```
 
-The first command validates schemas and JS syntax, tests clock math and scheduling,
+The first command validates schemas and JS syntax, tests clock math, scheduling and second-hand rendering,
 renders both themes at five sizes and two scales, and builds the ZIP under `dist/`.
 The ZIP contains only runtime files, schema source and compiled schema, and license.
 
@@ -138,7 +147,7 @@ The integration test stops its Shell on exit and retains its temporary logs for 
 
 ## Release
 
-Version 1.1.0 is prepared locally. Repository:
+Version 1.2.0 is prepared locally. Repository:
 `greenfinch628/nex-clockg`. Nothing is published automatically.
 Review `docs/VERIFICATION.md`, complete the outstanding platform checks, and obtain
 explicit approval before GitHub publication or release creation.

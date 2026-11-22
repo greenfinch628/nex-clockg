@@ -15,6 +15,10 @@ export default class NexClock extends Extension {
             this._settings = this.getSettings();
             this._actor = new St.DrawingArea({style_class: 'nex-clockg', reactive: false,
                 accessible_name: 'Analog clock'});
+            this._connect(this._actor, 'destroy', () => {
+                this._actor = null;
+                this.disable();
+            });
             this._connect(this._actor, 'repaint', area => {
                 const cr = area.get_context();
                 try {
@@ -46,6 +50,7 @@ export default class NexClock extends Extension {
         this._options = {
             theme: this._settings.get_string('theme'),
             movement: this._settings.get_string('movement'),
+            showSecondHand: this._settings.get_boolean('show-second-hand'),
             numerals: this._settings.get_string('numerals'),
             minuteMarkers: this._settings.get_boolean('minute-markers'),
         };
@@ -114,7 +119,7 @@ export default class NexClock extends Extension {
 
     _schedule() {
         const delay = nextDelay(Date.now(), this._options.movement,
-            this._settings.get_int('refresh-rate'));
+            this._settings.get_int('refresh-rate'), this._options.showSecondHand);
         this._timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, () => {
             this._timer = 0;
             if (this._actor?.mapped && this._actor.visible) {

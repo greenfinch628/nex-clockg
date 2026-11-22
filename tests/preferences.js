@@ -9,21 +9,37 @@ const app = new Adw.Application({application_id: 'io.github.greenfinch628.NexClo
 app.connect('activate', () => {
     const window = new Adw.PreferencesWindow({application: app});
     buildPreferences(window, settings);
-    function findSwitch(widget) {
-        if (widget instanceof Adw.SwitchRow && widget.title === 'Always on Top')
+    function findRow(widget, title) {
+        if (widget.title === title)
             return widget;
         for (let child = widget.get_first_child(); child; child = child.get_next_sibling()) {
-            const found = findSwitch(child);
+            const found = findRow(child, title);
             if (found) return found;
         }
         return null;
     }
-    const onTop = findSwitch(window);
+    const onTop = findRow(window, 'Always on Top');
     if (!onTop) throw new Error('Missing Always on Top switch');
     settings.set_boolean('always-on-top', false);
     if (onTop.active) throw new Error('Settings to switch binding failed');
     onTop.active = true;
     if (!settings.get_boolean('always-on-top')) throw new Error('Switch to settings binding failed');
+    const secondHand = findRow(window, 'Show Second Hand');
+    const movement = findRow(window, 'Movement');
+    const rate = findRow(window, 'Smooth refresh rate');
+    if (!secondHand || !movement || !rate) throw new Error('Missing second-hand controls');
+    settings.set_string('movement', 'smooth');
+    settings.set_boolean('show-second-hand', false);
+    if (secondHand.active || movement.sensitive || rate.sensitive)
+        throw new Error('Hidden hand controls should be insensitive');
+    secondHand.active = true;
+    if (!settings.get_boolean('show-second-hand') || !movement.sensitive || !rate.sensitive)
+        throw new Error('Visible hand binding/sensitivity failed');
+    settings.set_string('movement', 'tick');
+    if (!movement.sensitive || rate.sensitive) throw new Error('Tick refresh sensitivity failed');
+    settings.set_boolean('show-second-hand', false);
+    secondHand.active = true;
+    if (settings.get_string('movement') !== 'tick') throw new Error('Movement was reset');
     window.present();
     GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
         settings.set_string('theme', 'black');

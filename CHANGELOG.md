@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0 — 2026-11-21
+
+- Add a persistent Show Second Hand switch, enabled by default. Disable it to hide
+  the red hand and stop all smooth/tick updates and second-hand calculations.
+- Keep hour and minute hands current using one minute-aligned timeout while the
+  second hand is off. Replace the old timeout immediately on each mode change.
+- Gray out movement and refresh-rate controls while the hand is hidden, preserving
+  their selected values for re-enabling. Retain all existing clock settings.
+- Stop the update source when the clock actor is destroyed.
+
 ## 1.1.0 — 2026-11-21
 
 - Allow GNOME Shell 50 and 51 in metadata; GNOME 51 runtime testing is outstanding.

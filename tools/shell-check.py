@@ -25,6 +25,41 @@ def state():
 s = state()
 assert s['state'] == 1 and s['mapped'] and s['actors'] == 1 and s['timer'] > 0, s
 print('PASS: GNOME 50.6 loads desktop clock, maps actor, schedules animation.')
+# Toggle the same actor between motion updates and minute-only updates.
+assert evaluate("global.clockTest._settings.get_boolean('show-second-hand')")
+evaluate("global.clockTestActor=global.clockTest._actor; global.clockOriginalSignals=global.clockTest._signals.length; true")
+for mode in ['tick', 'smooth']:
+    evaluate(f"global.clockTest._settings.set_string('movement','{mode}'); true")
+    for visible in [False, True] * 5:
+        evaluate("global.clockOldTimer=global.clockTest._timer; true")
+        evaluate(f"global.clockTest._settings.set_boolean('show-second-hand',{str(visible).lower()}); true")
+        assert evaluate("!imports.gi.GLib.MainContext.default().find_source_by_id(global.clockOldTimer)")
+        assert evaluate("global.clockTest._actor===global.clockTestActor && global.clockTest._signals.length===global.clockOriginalSignals && global.clockTest._timer>0")
+        assert evaluate(f"global.clockTest._options.showSecondHand === {str(visible).lower()}")
+        if not visible:
+            # Compare actual GLib source deadline against the next wall-clock minute.
+            assert evaluate("Math.abs((imports.gi.GLib.MainContext.default().find_source_by_id(global.clockTest._timer).get_ready_time()-imports.gi.GLib.get_monotonic_time())/1000 - (60000-Date.now()%60000)) < 150")
+evaluate("global.clockTest._settings.set_boolean('show-second-hand',false); global.noSecondsPaints=0; global.noSecondsSignal=global.clockTest._actor.connect('repaint',()=>global.noSecondsPaints++); true")
+time.sleep(.15)
+evaluate("global.noSecondsPaints=0; true")
+time.sleep(.4)
+assert evaluate('global.noSecondsPaints<=1')  # One legitimate minute boundary is possible.
+# Trigger just the hour/minute timeout early to verify repaint and rearming without
+# waiting a minute. This touches the test source only, never the real desktop.
+evaluate("global.minuteTimer=global.clockTest._timer; imports.gi.GLib.MainContext.default().find_source_by_id(global.minuteTimer).set_ready_time(0); true")
+time.sleep(.15)
+assert evaluate("global.noSecondsPaints>=1 && global.clockTest._timer!==global.minuteTimer && !imports.gi.GLib.MainContext.default().find_source_by_id(global.minuteTimer)")
+evaluate("global.clockTest._actor.disconnect(global.noSecondsSignal); true")
+# Lifecycle persistence while disabled: a minute source, not a motion source.
+evaluate(f"Main.extensionManager.disableExtension('{uuid}'); true")
+time.sleep(.15)
+assert state()['timer']==0 and state()['signals']==0 and state()['actors']==0
+evaluate(f"Main.extensionManager.enableExtension('{uuid}'); true")
+time.sleep(.2)
+assert evaluate("!global.clockTest._options.showSecondHand && global.clockTest._actor.mapped && global.clockTest._timer>0")
+evaluate("global.clockTest._settings.set_boolean('show-second-hand',true); true")
+print('PASS: 20 second-hand toggles, old source removal, minute-only deadlines/redraw, lifecycle persistence.')
+
 # Check real normal/maximized windows and preserve actor identity and geometry.
 assert evaluate("global.clockTest._settings.get_boolean('always-on-top') === false")
 evaluate("global.savedClockActor=global.clockTest._actor; global.savedClockGeometry=[global.savedClockActor.x,global.savedClockActor.y,global.savedClockActor.width,global.savedClockActor.height]; true")
@@ -147,3 +182,8 @@ for _ in range(30):
     time.sleep(.1)
 assert evaluate('global.clockShotDone') and os.path.exists(path), evaluate('global.clockShotError')
 print('PASS: compositor screenshot:', path)
+
+# Unexpected actor destruction also releases the minute-only source and settings.
+evaluate("global.clockTest._settings.set_boolean('show-second-hand',false); global.clockDestroyedTimer=global.clockTest._timer; global.clockTest._actor.destroy(); true")
+assert evaluate("global.clockTest._actor===null && global.clockTest._timer===0 && global.clockTest._signals.length===0 && global.clockTest._settings===null && !imports.gi.GLib.MainContext.default().find_source_by_id(global.clockDestroyedTimer)")
+print('PASS: direct actor destruction releases minute source and all signal handlers.')

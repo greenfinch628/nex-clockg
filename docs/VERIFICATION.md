@@ -102,3 +102,30 @@ Off-mode desktop capture verify that the clock remains above the wallpaper.
 The user confirmed that the window-restacking correction fixed the reported
 behavior in their desktop session. Version 1.1.0 includes the pre-existing corner
 placement changes and the supplied README screenshots.
+
+
+## 1.2.0 second-hand toggle — November 21, 2026
+
+- Show Second Hand defaults to true, preserving the existing smooth/tick appearance.
+- Disabled rendering draws just the hour/minute hands and black center pivot; it
+  does not read seconds/milliseconds or calculate a second-hand angle. Tests cover
+  both face themes and verify two hand rotations with no red draw operations.
+- The single owned GLib timeout is removed before mode changes. Off replaces it
+  with a minute-aligned hour/minute timeout (1–60000 ms); there is no concurrent
+  smooth/tick source. Hand angles advance at minute granularity in this mode.
+- Isolated GNOME 50.6 tests toggle the hand twenty times in smooth/tick modes,
+  check removal of each old source, inspect actual minute-source deadlines, verify
+  no high-frequency repaints, and trigger the minute source early to check redraw
+  and rearming without a lengthy wait. Disable/enable retains the Off setting.
+- Preferences tests verify the new two-way switch binding, disabled movement/rate
+  controls, and preservation of the saved movement mode. Private dconf sessions
+  verify default On and persistence of Off alongside existing settings.
+- Direct actor destruction removes the update source and all registered handlers.
+  Existing stacking, workspace, overview and lifecycle regression tests pass.
+- Syntax, strict schemas, clock math, rendering tests, previews and ZIP validation
+  pass. No extension GJS lifecycle/rendering errors appear in the isolated run.
+
+GNOME 50 and 51 remain allowed in metadata. GNOME 51 runtime, physical logout/login
+and direct CPU/power measurements remain unavailable or unperformed; no measured
+power-saving claim is made. Minute-boundary math is tested independently, and the
+integration check accelerates its source rather than waiting a full minute.

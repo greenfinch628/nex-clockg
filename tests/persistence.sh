@@ -10,6 +10,8 @@ unset GSETTINGS_BACKEND
 dbus-run-session -- bash -c '
     set -euo pipefail
     [[ $(gsettings get org.gnome.shell.extensions.nex-clockg always-on-top) == false ]]
+    [[ $(gsettings get org.gnome.shell.extensions.nex-clockg show-second-hand) == true ]]
+    gsettings set org.gnome.shell.extensions.nex-clockg show-second-hand false
     gsettings set org.gnome.shell.extensions.nex-clockg always-on-top true
     gsettings set org.gnome.shell.extensions.nex-clockg theme black
     gsettings set org.gnome.shell.extensions.nex-clockg diameter 300
@@ -19,6 +21,7 @@ dbus-run-session -- bash -c '
     set -euo pipefail
     [[ $(gsettings get org.gnome.shell.extensions.nex-clockg theme) == "'"'"'black'"'"'" ]]
     [[ $(gsettings get org.gnome.shell.extensions.nex-clockg always-on-top) == true ]]
+    [[ $(gsettings get org.gnome.shell.extensions.nex-clockg show-second-hand) == false ]]
     [[ $(gsettings get org.gnome.shell.extensions.nex-clockg diameter) == 300 ]]
     [[ $(gsettings get org.gnome.shell.extensions.nex-clockg movement) == "'"'"'tick'"'"'" ]]
 '
